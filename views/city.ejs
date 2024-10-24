@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= city.name %> - City Overview</title>
+</head>
+<body>
+    <h1>City: <%= city.name %></h1>
+    <p>Population: <%= city.population %></p>
+    <p>Money: <%= city.money %></p>
+    <p>Energy: <%= city.energy %></p>
+    <h2>Buildings:</h2>
+    <ul>
+        <% city.buildings.forEach(building => { %>
+            <li><%= building %></li>
+        <% }) %>
+    </ul>
+    <!-- News Buildings -->
+</body>
+</html>
