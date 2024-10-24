@@ -16,6 +16,39 @@
             <li><%= building %></li>
         <% }) %>
     </ul>
-    <!-- News Buildings -->
+
+    <!-- New Buildings -->
+    <h2>Build a new building:</h2>
+<form action="/city/<%= city.name %>/build" method="POST">
+    <select name="building">
+        <% buildings.forEach(building => { %>
+            <option value="<%= building.name %>">
+                <%= building.name %> (Cost: <%= building.cost %>, Energy: <%= building.energyRequired %>)
+            </option>
+        <% }) %>
+    </select>
+    <button type="submit">Build</button>
+</form>
+
+<!-- Resources - maybe need to make it as a HUD -->
+
+<h2>City Resources:</h2>
+<p>Population: <%= city.population %></p>
+
+<div>
+    <label>Money:</label>
+    <div style="width: 100%; background-color: #f3f3f3;">
+        <div style="width: <%= (city.money / 1000) * 100 %>%; background-color: green; height: 24px;"></div>
+    </div>
+</div>
+
+<div>
+    <label>Energy:</label>
+    <div style="width: 100%; background-color: #f3f3f3;">
+        <div style="width: <%= (city.energy / 500) * 100 %>%; background-color: yellow; height: 24px;"></div>
+    </div>
+</div>
+
+
 </body>
 </html>

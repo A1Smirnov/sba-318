@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
+// Add buildings list
+const buildings = require('../models/building.js');
 
 // City data
 let cities = [];
 
-// Route for making new city
+// Route for making a new city
 router.post('/create', (req, res) => {
     const cityName = req.body.name;
     const newCity = {
@@ -22,9 +24,32 @@ router.post('/create', (req, res) => {
 router.get('/:name', (req, res) => {
     const city = cities.find(city => city.name === req.params.name);
     if (city) {
-        res.render('city', { city });
+        // Pass city and buildings to the template
+        res.render('city', { city, buildings });
     } else {
         res.send('City not found');
+    }
+});
+
+// Route to "build" new structure
+router.post('/:name/build', (req, res) => {
+    const city = cities.find(city => city.name === req.params.name);
+    const buildingName = req.body.building;
+    const building = buildings.find(b => b.name === buildingName);
+
+    if (city && building) {
+        // Check for resources, resources math
+        if (city.money >= building.cost && city.energy >= building.energyRequired) {
+            city.money -= building.cost;
+            city.energy -= building.energyRequired;
+            city.population += building.populationIncrease;
+            city.buildings.push(building.name);
+            res.redirect(`/city/${city.name}`);
+        } else {
+            res.send('Not enough resources to build this.');
+        }
+    } else {
+        res.send('City or building not found.');
     }
 });
 
