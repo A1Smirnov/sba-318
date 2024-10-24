@@ -53,4 +53,49 @@ router.post('/:name/build', (req, res) => {
     }
 });
 
+// Route to pass the turn
+router.post('/:name/pass-turn', (req, res) => {
+    const city = cities.find(city => city.name === req.params.name);
+    
+    if (city) {
+        // Define resources
+        let totalMoneyGenerated = 0;
+        let totalEnergyGenerated = 0;
+        let totalFoodGenerated = 0;
+
+        // Check each buildings for economy calc
+        city.buildings.forEach(buildingName => {
+            const building = buildings.find(b => b.name === buildingName);
+            
+            if (building) {
+                // Test consumpted resources
+                if (city.energy >= building.resourceConsumption.energy) {
+                    // Building resource generation
+                    totalMoneyGenerated += building.resourceGeneration.money;
+                    totalEnergyGenerated += building.resourceGeneration.energy;
+                    totalFoodGenerated += building.resourceGeneration.food;
+
+                    // Reource consumption
+                    city.money -= building.resourceConsumption.money;
+                    city.energy -= building.resourceConsumption.energy;
+                    city.food -= building.resourceConsumption.food;
+                } else {
+                    // Lack of resource lead to non-functional buildings
+                    console.log(`${buildingName} not functioning because a lack of energy(resources).`);
+                }
+            }
+        });
+
+        // Update city resources
+        city.money += totalMoneyGenerated;
+        city.energy += totalEnergyGenerated;
+        city.food += totalFoodGenerated;
+
+        // Redirect to a city
+        res.redirect(`/city/${city.name}`);
+    } else {
+        res.send('City not found.');
+    }
+});
+
 module.exports = router;

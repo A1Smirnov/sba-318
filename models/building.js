@@ -7,23 +7,38 @@
 
 const buildings = [
     {
-        name: "Factory",
-        cost: 200,
-        energyRequired: 100,
-        populationIncrease: 20
+        name: 'Factory',
+        cost: 50,
+        energyRequired: 3,
+        populationIncrease: 0,
+        resourceGeneration: {
+            money: 10,
+            energy: 0,
+            food: 0
+        },
+        resourceConsumption: {
+            money: 0,
+            energy: 3,
+            food: 0
+        }
     },
     {
-        name: "School",
-        cost: 150,
-        energyRequired: 50,
-        populationIncrease: 0
-    },
-    {
-        name: "House",
-        cost: 100,
-        energyRequired: 30,
-        populationIncrease: 50
+        name: 'Food farm',
+        cost: 30,
+        energyRequired: 2,
+        populationIncrease: 0,
+        resourceGeneration: {
+            money: 5,
+            energy: 0,
+            food: 15
+        },
+        resourceConsumption: {
+            money: 0,
+            energy: 2,
+            food: 0
+        }
     }
+    // Add more buildings after test
 ];
 
 module.exports = buildings;
