@@ -1,5 +1,6 @@
 function resourceCalculation(req, res, next) {
     const city = req.city; // Send object City to middleware
+    const buildings = require('../models/building');
 
     if (city) {
         // Calc resources

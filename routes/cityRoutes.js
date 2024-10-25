@@ -2,7 +2,11 @@ const express = require('express');
 const router = express.Router();
 // Add buildings list
 const buildings = require('../models/building.js');
+// Add logger
+const logger = require('../middleware/logger');
 
+// Logger middleware for all routes
+router.use(logger);
 // City data
 let cities = [];
 
