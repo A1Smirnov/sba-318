@@ -13,7 +13,13 @@
     <h2>Buildings:</h2>
     <ul>
         <% city.buildings.forEach(building => { %>
-            <li><%= building %></li>
+            <li>
+                <%= building %>
+                <form action="/city/<%= city.name %>/buildings/<%= building %>" method="POST" style="display: inline;">
+                    <input type="hidden" name="_method" value="DELETE">
+                    <button type="submit" style="background-color: red; color: white; border: none; padding: 5px 10px; cursor: pointer;">Delete</button>
+                </form>
+            </li>
         <% }) %>
     </ul>
 

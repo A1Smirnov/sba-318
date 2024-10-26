@@ -173,7 +173,55 @@ router.post('/:name/pass-turn', (req, res, next) => {
     }
 });
 
-// Route to display quests list
+// Route to delete a building
+router.delete('/:name/buildings/:buildingName', (req, res, next) => {
+    try {
+        const city = cities.find(city => city.name === req.params.name);
+        const buildingName = req.params.buildingName;
+
+        if (city) {
+            // Check if the building exists in the city's buildings list
+            const buildingIndex = city.buildings.indexOf(buildingName);
+
+            if (buildingIndex !== -1) {
+                // Remove the building from the city's buildings list
+                city.buildings.splice(buildingIndex, 1);
+                res.status(200).json({ message: 'Building deleted successfully.' });
+            } else {
+                const error = new Error('Building not found in the city.');
+                error.status = 404;
+                next(error);
+            }
+        } else {
+            const error = new Error('City not found.');
+            error.status = 404;
+            next(error);
+        }
+    } catch (error) {
+        next(error);
+    }
+});
+
+// DELETE for deleting building
+router.post('/:name/buildings/:buildingName', (req, res) => {
+    const cityName = req.params.name;
+    const buildingName = req.params.buildingName;
+
+    // City
+    const city = cities.find(c => c.name === cityName);
+    if (!city) {
+        return res.status(404).send('City not found');
+    }
+
+    // Building
+    const buildingIndex = city.buildings.indexOf(buildingName);
+    if (buildingIndex > -1) {
+        city.buildings.splice(buildingIndex, 1);
+        return res.redirect(`/city/${cityName}`);
+    } else {
+        return res.status(404).send('Building not found');
+    }
+});
 
 
 module.exports = router;

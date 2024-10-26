@@ -3,12 +3,16 @@ const bodyParser = require('body-parser');
 const app = express();
 const cityRoutes = require('./routes/cityRoutes');
 const errorHandler = require('./middleware/errorHandler');
+const methodOverride = require('method-override');
 
 // Set EJS Template
 app.set('view engine', 'ejs');
 
 // Middleware to body parse
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Use method-override
+app.use(methodOverride('_method'));
 
 // Connecting routes
 app.use('/city', cityRoutes);
