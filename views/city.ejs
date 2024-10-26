@@ -19,6 +19,22 @@
                     <input type="hidden" name="_method" value="DELETE">
                     <button type="submit" style="background-color: red; color: white; border: none; padding: 5px 10px; cursor: pointer;">Delete</button>
                 </form>
+    
+                <% const currentBuilding = buildings.find(b => b.name === building); %>
+                <% if (currentBuilding.upgrades) { %>
+                    <form action="/city/<%= city.name %>/upgrade" method="POST" style="display: inline;">
+                        <input type="hidden" name="_method" value="PATCH"> <!-- This is crucial -->
+                        <input type="hidden" name="building" value="<%= building %>"> <!-- Add building name -->
+                        <select name="upgrade">
+                            <% currentBuilding.upgrades.forEach(upgrade => { %>
+                                <option value="<%= upgrade.name %>">
+                                    <%= upgrade.name %> (Cost: <%= upgrade.cost %>, Energy: <%= upgrade.energyRequired %>)
+                                </option>
+                            <% }) %>
+                        </select>
+                        <button type="submit">Upgrade</button>
+                    </form>
+                <% } %>
             </li>
         <% }) %>
     </ul>

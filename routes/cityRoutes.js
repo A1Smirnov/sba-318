@@ -1,28 +1,39 @@
+// models/cityRoutes.js
+
 const express = require('express');
 const router = express.Router();
-// Add buildings list
 const buildings = require('../models/building.js');
-// Add logger
 const logger = require('../middleware/logger.js');
 const quests = require('../models/quests.js');
 
-// Logger middleware for all routes
 router.use(logger);
-// City data
 let cities = [];
 
-
-// Route for making a new city
+// Route for creating a new city
 router.post('/create', (req, res, next) => {
     try {
         const cityName = req.body.name;
+
+        // Validation: Check if city name is provided and valid
+        if (!cityName || !/^[a-zA-Z0-9\s-]+$/.test(cityName)) {
+            return res.status(400).send('Invalid city name. Please use only letters, numbers, spaces, and hyphens.');
+        }
+
+        // Check if city already exists
+        const existingCity = cities.find(city => city.name === cityName);
+        if (existingCity) {
+            return res.status(400).send('City already exists.');
+        }
+
         const newCity = {
             name: cityName,
             population: 100,
             money: 1000,
             energy: 500,
+            food: 0,
             buildings: []
         };
+        
         cities.push(newCity);
         res.redirect(`/city/${cityName}`);
     } catch (error) {
@@ -30,8 +41,76 @@ router.post('/create', (req, res, next) => {
     }
 });
 
+// Route to "build" new structure or upgrade an existing one
+router.post('/:name/build', (req, res, next) => {
+    try {
+        const city = cities.find(city => city.name === req.params.name);
+        const buildingName = req.body.building;
+        const upgradeName = req.body.upgrade; // Get the upgrade name if provided
+        let building = buildings.find(b => b.name === buildingName);
+
+        if (city) {
+            if (upgradeName) {
+                // Logic for upgrading the building
+                const upgrade = building.upgrades.find(u => u.name === upgradeName);
+
+                if (upgrade) {
+                    // Check resources for upgrading
+                    if (city.money >= upgrade.cost && city.energy >= upgrade.energyRequired) {
+                        city.money -= upgrade.cost;
+                        city.energy -= upgrade.energyRequired;
+
+                        // Apply the upgrade
+                        const buildingIndex = city.buildings.indexOf(buildingName);
+                        if (buildingIndex !== -1) {
+                            city.buildings[buildingIndex] = upgrade.name; // Replace building with upgraded version
+                        }
+
+                        return res.redirect(`/city/${city.name}`);
+                    } else {
+                        const error = new Error('Not enough resources to upgrade this building.');
+                        error.status = 400;
+                        return next(error);
+                    }
+                } else {
+                    const error = new Error('Upgrade not found.');
+                    error.status = 404;
+                    return next(error);
+                }
+            } else {
+                // Logic for building a new structure
+                if (building) {
+                    if (city.money >= building.cost && city.energy >= building.energyRequired) {
+                        city.money -= building.cost;
+                        city.energy -= building.energyRequired;
+                        city.population += building.populationIncrease;
+                        city.buildings.push(building.name);
+                        return res.redirect(`/city/${city.name}`);
+                    } else {
+                        const error = new Error('Not enough resources to build this.');
+                        error.status = 400;
+                        return next(error);
+                    }
+                } else {
+                    const error = new Error('Building not found.');
+                    error.status = 404;
+                    return next(error);
+                }
+            }
+        } else {
+            const error = new Error('City not found.');
+            error.status = 404;
+            return next(error);
+        }
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Additional routes remain unchanged
+
+// Route for quests
 router.get('/quests', (req, res) => {
-    // Render the quests page, passing the quests data to the view
     res.render('quests', { quests });
 });
 
@@ -50,7 +129,6 @@ router.post('/:name/quests/toggle-completion/:id', (req, res, next) => {
         if (quest.completed) {
             city.money += quest.reward.money || 0;
             city.population += quest.reward.population || 0;
-            // Add anything else
         }
 
         res.json({ success: true, quest });
@@ -65,7 +143,6 @@ router.get('/:name/quests', (req, res, next) => {
     const city = cities.find(c => c.name === cityName);
 
     if (city) {
-        // Render the quests page and pass the quests and city to the view
         res.render('quests', { quests, city });
     } else {
         const error = new Error('City not found');
@@ -73,7 +150,6 @@ router.get('/:name/quests', (req, res, next) => {
         next(error);
     }
 });
-
 
 // Route to check city
 router.get('/:name', (req, res, next) => {
@@ -84,36 +160,6 @@ router.get('/:name', (req, res, next) => {
             res.render('city', { city, buildings });
         } else {
             const error = new Error('City not found');
-            error.status = 404;
-            next(error);
-        }
-    } catch (error) {
-        next(error);
-    }
-});
-
-// Route to "build" new structure
-router.post('/:name/build', (req, res, next) => {
-    try {
-        const city = cities.find(city => city.name === req.params.name);
-        const buildingName = req.body.building;
-        const building = buildings.find(b => b.name === buildingName);
-
-        if (city && building) {
-            // Check for resources, resources math
-            if (city.money >= building.cost && city.energy >= building.energyRequired) {
-                city.money -= building.cost;
-                city.energy -= building.energyRequired;
-                city.population += building.populationIncrease;
-                city.buildings.push(building.name);
-                res.redirect(`/city/${city.name}`);
-            } else {
-                const error = new Error('Not enough resources to build this.');
-                error.status = 400;
-                next(error);
-            }
-        } else {
-            const error = new Error('City or building not found.');
             error.status = 404;
             next(error);
         }
@@ -202,18 +248,18 @@ router.delete('/:name/buildings/:buildingName', (req, res, next) => {
     }
 });
 
-// DELETE for deleting building
+// Route for deleting a building
 router.post('/:name/buildings/:buildingName', (req, res) => {
     const cityName = req.params.name;
     const buildingName = req.params.buildingName;
 
-    // City
+    // Find the city
     const city = cities.find(c => c.name === cityName);
     if (!city) {
         return res.status(404).send('City not found');
     }
 
-    // Building
+    // Find the building
     const buildingIndex = city.buildings.indexOf(buildingName);
     if (buildingIndex > -1) {
         city.buildings.splice(buildingIndex, 1);
@@ -222,6 +268,59 @@ router.post('/:name/buildings/:buildingName', (req, res) => {
         return res.status(404).send('Building not found');
     }
 });
+
+// Route to upgrade a building
+router.patch('/:name/upgrade', (req, res, next) => {
+
+    //duplicate testing - delete after
+    const cityName = req.params.name;
+    const city = cities.find(c => c.name === cityName);
+    const upgradeName = req.body.upgrade; // Get upgrade name
+    const buildingName = req.body.building; // Get building name
+    // end of duplicating
+
+    console.log('Upgrade request received:', req.body);
+    
+    try {
+        const city = cities.find(city => city.name === req.params.name);
+        const upgradeName = req.body.upgrade; // Get the upgrade name from the request
+        const buildingName = req.body.building; // You might need to pass this through the form
+
+        const building = buildings.find(b => b.name === buildingName);
+
+        if (city && building) {
+            const upgrade = building.upgrades.find(u => u.name === upgradeName);
+
+            if (upgrade) {
+                // Check for sufficient resources
+                if (city.money >= upgrade.cost && city.energy >= upgrade.energyRequired) {
+                    city.money -= upgrade.cost;
+                    city.energy -= upgrade.energyRequired;
+
+                    // Here, you could replace or update building attributes if needed
+                    // For simplicity, let's just keep the building name and details
+
+                    return res.redirect(`/city/${city.name}`);
+                } else {
+                    const error = new Error('Not enough resources to upgrade this building.');
+                    error.status = 400;
+                    return next(error);
+                }
+            } else {
+                const error = new Error('Upgrade not found.');
+                error.status = 404;
+                return next(error);
+            }
+        } else {
+            const error = new Error('City or building not found.');
+            error.status = 404;
+            return next(error);
+        }
+    } catch (error) {
+        next(error);
+    }
+});
+
 
 
 module.exports = router;

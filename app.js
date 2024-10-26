@@ -8,6 +8,7 @@ const methodOverride = require('method-override');
 // Set EJS Template
 app.set('view engine', 'ejs');
 
+app.use(bodyParser.json());
 // Middleware to body parse
 app.use(bodyParser.urlencoded({ extended: true }));
 
