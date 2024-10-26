@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quests</title>
+</head>
+<body>
+    <h1>Quests</h1>
+    <ul>
+        <% quests.forEach(quest => { %>
+            <li>
+                <label>
+                    <input type="checkbox" <%= quest.completed ? 'checked' : '' %> onclick="toggleCompletion(<%= quest.id %>)">
+                    <%= quest.description %> - Reward: <%= quest.reward.money %> coins, <%= quest.reward.population %> population
+                </label>
+            </li>
+        <% }); %>
+    </ul>
+
+    <script>
+        function toggleCompletion(questId) {
+            fetch(`/quests/toggle-completion/${questId}`, {
+                method: 'POST',
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Quest status updated');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
