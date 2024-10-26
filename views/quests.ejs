@@ -7,9 +7,19 @@
 </head>
 <body>
     <h1>Quests</h1>
-    <ul>
+
+    <!-- Dropdown for filtering by difficulty -->
+    <label for="difficulty">Filter by difficulty:</label>
+    <select id="difficulty" onchange="filterQuests()">
+        <option value="all">All</option>
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+    </select>
+
+    <ul id="quest-list">
         <% quests.forEach(quest => { %>
-            <li>
+            <li class="quest-item" data-difficulty="<%= quest.difficulty %>">
                 <label>
                     <input type="checkbox" <%= quest.completed ? 'checked' : '' %> onclick="toggleCompletion(<%= quest.id %>)">
                     <%= quest.description %> - Reward: <%= quest.reward.money %> coins, <%= quest.reward.population %> population
@@ -20,7 +30,6 @@
 
     <script>
         function toggleCompletion(questId) {
-            // Get city name dynamically if available
             const cityName = "<%= city.name %>"; 
     
             fetch(`/city/${cityName}/quests/toggle-completion/${questId}`, {
@@ -31,6 +40,19 @@
                 if (data.success) {
                     console.log('Quest status updated');
                     location.reload(); 
+                }
+            });
+        }
+
+        function filterQuests() {
+            const difficulty = document.getElementById('difficulty').value;
+            const quests = document.querySelectorAll('.quest-item');
+
+            quests.forEach(quest => {
+                if (difficulty === 'all' || quest.dataset.difficulty === difficulty) {
+                    quest.style.display = 'list-item';
+                } else {
+                    quest.style.display = 'none';
                 }
             });
         }

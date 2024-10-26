@@ -110,8 +110,13 @@ router.post('/:name/build', (req, res, next) => {
 // Additional routes remain unchanged
 
 // Route for quests
-router.get('/quests', (req, res) => {
-    res.render('quests', { quests });
+router.get('/quests/:difficulty([easy|medium|hard])', (req, res) => {
+    const difficulty = req.params.difficulty;
+    
+    // Filter quests
+    const filteredQuests = quests.filter(quest => quest.difficulty === difficulty);
+
+    res.render('quests', { quests: filteredQuests });
 });
 
 // Route to toggle quest completion for a specific city
