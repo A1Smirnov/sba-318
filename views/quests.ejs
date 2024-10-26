@@ -20,13 +20,17 @@
 
     <script>
         function toggleCompletion(questId) {
-            fetch(`/quests/toggle-completion/${questId}`, {
+            // Get city name dynamically if available
+            const cityName = "<%= city.name %>"; // Передача названия города
+    
+            fetch(`/city/${cityName}/quests/toggle-completion/${questId}`, {
                 method: 'POST',
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     console.log('Quest status updated');
+                    location.reload(); // Перезагрузка страницы для отображения обновленных данных
                 }
             });
         }

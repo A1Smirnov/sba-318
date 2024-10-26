@@ -12,33 +12,6 @@ router.use(logger);
 let cities = [];
 
 
-router.get('/quests', (req, res) => {
-    // Render the quests page, passing the quests data to the view
-    res.render('quests', { quests });
-});
-
-// Route to toggle quest completion
-router.post('/quests/toggle-completion/:id', (req, res) => {
-    const questId = parseInt(req.params.id);
-    const quest = quests.find(q => q.id === questId);
-
-    if (quest) {
-        quest.completed = !quest.completed;
-
-        // Reward the player only if the quest has been newly completed
-        if (quest.completed) {
-            // Add reward logic here, for example:
-            // city.money += quest.reward.money;
-            // city.population += quest.reward.population;
-        }
-
-        res.json({ success: true, quest });
-    } else {
-        res.json({ success: false });
-    }
-});
-
-
 // Route for making a new city
 router.post('/create', (req, res, next) => {
     try {
@@ -56,6 +29,51 @@ router.post('/create', (req, res, next) => {
         next(error);
     }
 });
+
+router.get('/quests', (req, res) => {
+    // Render the quests page, passing the quests data to the view
+    res.render('quests', { quests });
+});
+
+// Route to toggle quest completion for a specific city
+router.post('/:name/quests/toggle-completion/:id', (req, res, next) => {
+    const questId = parseInt(req.params.id);
+    const cityName = req.params.name;
+    const city = cities.find(c => c.name === cityName);
+    const quest = quests.find(q => q.id === questId);
+
+    if (city && quest) {
+        // Toggle completion status
+        quest.completed = !quest.completed;
+
+        // Apply rewards only if the quest is newly completed
+        if (quest.completed) {
+            city.money += quest.reward.money || 0;
+            city.population += quest.reward.population || 0;
+            // Add anything else
+        }
+
+        res.json({ success: true, quest });
+    } else {
+        res.status(404).json({ success: false, message: 'City or quest not found' });
+    }
+});
+
+// Route to display quests list for a specific city
+router.get('/:name/quests', (req, res, next) => {
+    const cityName = req.params.name;
+    const city = cities.find(c => c.name === cityName);
+
+    if (city) {
+        // Render the quests page and pass the quests and city to the view
+        res.render('quests', { quests, city });
+    } else {
+        const error = new Error('City not found');
+        error.status = 404;
+        next(error);
+    }
+});
+
 
 // Route to check city
 router.get('/:name', (req, res, next) => {
