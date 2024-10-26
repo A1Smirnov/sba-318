@@ -11,6 +11,34 @@ router.use(logger);
 // City data
 let cities = [];
 
+
+router.get('/quests', (req, res) => {
+    // Render the quests page, passing the quests data to the view
+    res.render('quests', { quests });
+});
+
+// Route to toggle quest completion
+router.post('/quests/toggle-completion/:id', (req, res) => {
+    const questId = parseInt(req.params.id);
+    const quest = quests.find(q => q.id === questId);
+
+    if (quest) {
+        quest.completed = !quest.completed;
+
+        // Reward the player only if the quest has been newly completed
+        if (quest.completed) {
+            // Add reward logic here, for example:
+            // city.money += quest.reward.money;
+            // city.population += quest.reward.population;
+        }
+
+        res.json({ success: true, quest });
+    } else {
+        res.json({ success: false });
+    }
+});
+
+
 // Route for making a new city
 router.post('/create', (req, res, next) => {
     try {
@@ -28,7 +56,6 @@ router.post('/create', (req, res, next) => {
         next(error);
     }
 });
-
 
 // Route to check city
 router.get('/:name', (req, res, next) => {
@@ -129,30 +156,6 @@ router.post('/:name/pass-turn', (req, res, next) => {
 });
 
 // Route to display quests list
-router.get('/quests', (req, res) => {
-    // Render the quests page, passing the quests data to the view
-    res.render('quests', { quests });
-});
 
-// Route to toggle quest completion
-router.post('/quests/toggle-completion/:id', (req, res) => {
-    const questId = parseInt(req.params.id);
-    const quest = quests.find(q => q.id === questId);
-
-    if (quest) {
-        quest.completed = !quest.completed;
-
-        // Reward the player only if the quest has been newly completed
-        if (quest.completed) {
-            // Add reward logic here, for example:
-            // city.money += quest.reward.money;
-            // city.population += quest.reward.population;
-        }
-
-        res.json({ success: true, quest });
-    } else {
-        res.json({ success: false });
-    }
-});
 
 module.exports = router;
