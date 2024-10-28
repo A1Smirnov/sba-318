@@ -173,6 +173,22 @@ router.get('/:name', (req, res, next) => {
     }
 });
 
+// Route to get the list of buildings in a specific city
+router.get('/:name/buildings', (req, res) => {
+    const cityName = req.params.name; // Получаем имя города из параметров
+    const city = cities.find(city => city.name === cityName); // Поиск города по имени
+
+    if (city) {
+        // Backing up city buildings
+        res.json({ buildings: city.buildings });
+    } else {
+        return res.status(404).json({ error: 'City not found' });
+    }
+});
+
+
+
+
 // Route to pass the turn
 router.post('/:name/pass-turn', (req, res, next) => {
     try {

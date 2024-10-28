@@ -21,19 +21,28 @@
                 </form>
     
                 <% const currentBuilding = buildings.find(b => b.name === building); %>
-                <% if (currentBuilding.upgrades) { %>
-                    <form action="/city/<%= city.name %>/upgrade" method="POST" style="display: inline;">
-                        <input type="hidden" name="_method" value="PATCH"> <!-- This is crucial -->
-                        <input type="hidden" name="buildingName" value="<%= building %>"> <!-- Add building Name -->
-                        <select name="upgrade">
-                            <% currentBuilding.upgrades.forEach(upgrade => { %>
-                                <option value="<%= upgrade.name %>">
-                                    <%= upgrade.name %> (Cost: <%= upgrade.cost %>, Energy: <%= upgrade.energyRequired %>)
-                                </option>
-                            <% }) %>
-                        </select>
-                        <button type="submit">Upgrade</button>
-                    </form>
+                <% console.log("Building Name:", building); %> <!-- Отладочное сообщение -->
+                <% console.log("Current Building:", currentBuilding); %> <!-- Отладочное сообщение -->
+
+                <% if (currentBuilding) { %> <!-- Проверка на наличие currentBuilding -->
+                    <% if (currentBuilding.upgrades && currentBuilding.upgrades.length > 0) { %> <!-- Проверка на наличие upgrades -->
+                        <form action="/city/<%= city.name %>/upgrade" method="POST" style="display: inline;">
+                            <input type="hidden" name="_method" value="PATCH"> <!-- This is crucial -->
+                            <input type="hidden" name="buildingName" value="<%= building %>"> <!-- Add building Name -->
+                            <select name="upgrade">
+                                <% currentBuilding.upgrades.forEach(upgrade => { %>
+                                    <option value="<%= upgrade.name %>">
+                                        <%= upgrade.name %> (Cost: <%= upgrade.cost %>, Energy: <%= upgrade.energyRequired %>)
+                                    </option>
+                                <% }) %>
+                            </select>
+                            <button type="submit">Upgrade</button>
+                        </form>
+                    <% } else { %>
+                        <p>This building has no upgrades available.</p>
+                    <% } %>
+                <% } else { %>
+                    <p>Building not found: <%= building %></p>
                 <% } %>
             </li>
         <% }) %>
