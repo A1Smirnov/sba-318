@@ -278,7 +278,7 @@ router.post('/:name/buildings/:buildingName', (req, res) => {
 router.patch('/:name/upgrade', (req, res, next) => {
     try {
         const city = cities.find(c => c.name === req.params.name);
-        const { buildingName, upgradeName } = req.body;
+        const { buildingName, upgradeName } = req.body; 
 
         if (!city) return res.status(404).send('City not found');
 
