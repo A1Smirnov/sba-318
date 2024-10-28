@@ -24,7 +24,7 @@
                 <% if (currentBuilding.upgrades) { %>
                     <form action="/city/<%= city.name %>/upgrade" method="POST" style="display: inline;">
                         <input type="hidden" name="_method" value="PATCH"> <!-- This is crucial -->
-                        <input type="hidden" name="building" value="<%= building %>"> <!-- Add building name -->
+                        <input type="hidden" name="buildingName" value="<%= building %>"> <!-- Add building Name -->
                         <select name="upgrade">
                             <% currentBuilding.upgrades.forEach(upgrade => { %>
                                 <option value="<%= upgrade.name %>">
